@@ -4,13 +4,30 @@
 
 import { ALL_TABLES } from "./dummyData";
 
-// Deep clone to avoid mutation
-const db = JSON.parse(JSON.stringify(ALL_TABLES));
+// Helper: save to localStorage
+const saveToStorage = () => {
+  try {
+    localStorage.setItem('taskdesk_mock_db', JSON.stringify(db));
+  } catch (e) {
+    console.error('Failed to save to local database:', e);
+  }
+};
+
+// Initialize DB from storage or ALL_TABLES
+let storedDb = null;
+try {
+  const data = localStorage.getItem('taskdesk_mock_db');
+  if (data) storedDb = JSON.parse(data);
+} catch (e) {
+  console.warn('LocalStorage data corrupted, resetting to defaults.');
+}
+
+const db = storedDb || JSON.parse(JSON.stringify(ALL_TABLES));
 
 // Helper: get next ID for a table
 const getNextId = (table) => {
   const arr = db[table] || [];
-  const maxId = arr.reduce((max, r) => Math.max(max, r.id || r.task_id || 0), 0);
+  const maxId = arr.reduce((max, r) => Math.max(max, Number(r.id || r.task_id || 0)), 0);
   return maxId + 1;
 };
 
@@ -30,6 +47,7 @@ class QueryBuilder {
     this._op = 'select'; // select | insert | update | delete
     this._insertData = null;
     this._updateData = null;
+    this._isUpsert = false;
   }
 
   select(cols, opts) {
@@ -132,6 +150,7 @@ class QueryBuilder {
 
   upsert(data, opts) {
     this._op = 'insert';
+    this._isUpsert = true;
     this._insertData = Array.isArray(data) ? data : [data];
     return this;
   }
@@ -141,13 +160,29 @@ class QueryBuilder {
     const table = db[this._table] || [];
 
     if (this._op === 'insert') {
+      const isUpsert = this._isUpsert === true;
       const inserted = (this._insertData || []).map(row => {
-        const nextId = getNextId(this._table);
-        const newRow = { ...row, id: nextId, task_id: nextId };
-        table.push(newRow);
-        return newRow;
+        const id = row.id || row.task_id;
+        let existingIdx = -1;
+        
+        if (isUpsert && id) {
+          existingIdx = table.findIndex(r => (r.id || r.task_id) === id);
+        }
+
+        if (existingIdx !== -1) {
+          // Update
+          table[existingIdx] = { ...table[existingIdx], ...row };
+          return table[existingIdx];
+        } else {
+          // Insert
+          const nextId = id || getNextId(this._table);
+          const newRow = { ...row, id: nextId, task_id: nextId };
+          table.push(newRow);
+          return newRow;
+        }
       });
       db[this._table] = table;
+      saveToStorage();
       return { data: inserted, error: null, count: inserted.length };
     }
 
@@ -156,6 +191,7 @@ class QueryBuilder {
       this._filters.forEach(fn => { filtered = filtered.filter(fn); });
       const idsToRemove = new Set(filtered.map(r => r.id || r.task_id));
       db[this._table] = table.filter(r => !idsToRemove.has(r.id || r.task_id));
+      saveToStorage();
       return { data: filtered, error: null, count: filtered.length };
     }
 
@@ -171,6 +207,7 @@ class QueryBuilder {
         }
       });
       db[this._table] = table;
+      saveToStorage();
       return { data: updatedRows, error: null, count: updatedRows.length };
     }
 
