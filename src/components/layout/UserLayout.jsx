@@ -1,10 +1,9 @@
 "use client"
-import aceLogo from "../assets/Ace_Logoo.jpg";
 
 import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 // Supabase removed
-import { Home, ClipboardList, CheckSquare, User as UserIcon, LogOut, Menu, X } from "lucide-react"
+import { Home, ClipboardList, CheckSquare, User as UserIcon, LogOut, Menu, X, Zap } from "lucide-react"
 
 const UserLayout = ({ children }) => {
   const navigate = useNavigate()
@@ -77,7 +76,9 @@ const UserLayout = ({ children }) => {
             to={isAdmin ? "/admin/dashboard" : "/user/dashboard"}
             className="flex items-center gap-2 font-semibold text-green-700 dark:text-green-300"
           >
-            <img src={aceLogo} alt="TaskDesk Logo" className="h-8 w-8 rounded-full object-cover border border-green-200" />
+            <div className="p-1.5 bg-green-600 rounded-lg text-white shadow-sm">
+              <Zap size={18} fill="currentColor" />
+            </div>
             <span>TaskDesk</span>
           </Link>
         </div>
@@ -155,8 +156,10 @@ const UserLayout = ({ children }) => {
             className="flex items-center gap-2 font-semibold text-green-700 dark:text-green-300"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            <img src={aceLogo} alt="TaskDesk Logo" className="h-8 w-8 rounded-full object-cover border border-green-200" />
-            <span>TaskDesk</span>
+            <div className="p-1.5 bg-green-600 rounded-lg text-white shadow-sm">
+              <Zap size={16} fill="currentColor" />
+            </div>
+            <span className="font-bold text-green-700 dark:text-green-300">TaskDesk</span>
           </Link>
         </div>
         <nav className="flex-1 overflow-y-auto p-2 bg-white dark:bg-gray-950">

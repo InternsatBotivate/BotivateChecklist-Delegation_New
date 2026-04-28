@@ -1,5 +1,4 @@
 "use client";
-import aceLogo from "../../assets/Ace_Logoo.jpg";
 
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -301,7 +300,9 @@ export default function AdminLayout({ children, darkMode, toggleDarkMode, showLa
             to="/dashboard/admin"
             className="flex items-center gap-2 font-semibold text-blue-700"
           >
-            <img src={aceLogo} alt="TaskDesk Logo" className="h-8 w-8 rounded-full object-cover border border-blue-200" />
+            <div className="p-1.5 bg-blue-600 rounded-lg text-white shadow-sm">
+              <Zap size={18} fill="currentColor" />
+            </div>
             <span>TaskDesk</span>
           </Link>
         </div>
@@ -492,8 +493,10 @@ export default function AdminLayout({ children, darkMode, toggleDarkMode, showLa
                 className="flex items-center gap-2 font-semibold text-blue-700"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <img src={aceLogo} alt="TaskDesk Logo" className="h-8 w-8 rounded-full object-cover border border-blue-200" />
-                <span>TaskDesk</span>
+                <div className="p-1.5 bg-blue-600 rounded-lg text-white shadow-sm">
+                  <Zap size={16} fill="currentColor" />
+                </div>
+                <span className="font-bold text-blue-700">TaskDesk</span>
               </Link>
             </div>
             <nav className="flex-1 overflow-y-auto p-2 bg-white">
